@@ -15,6 +15,10 @@ const io = socketIo(server, {
 app.use(express.json());
 app.use(cors());
 
+app.get("/", (req, res) => {
+  res.send("Welcome to Express API!");
+});
+
 // Socket connection
 io.on("connection", (socket) => {
   // Send the current number when a user connects
