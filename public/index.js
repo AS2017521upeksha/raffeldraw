@@ -1,4 +1,4 @@
-const socket = io("http://localhost:5000/");
+const socket = io("https://raffeldraw.onrender.com");
 const rollButton = document.getElementById("rollButton");
 const refreshButton = document.getElementById("refreshButton");
 const digit1Element = document.getElementById("digit1");
