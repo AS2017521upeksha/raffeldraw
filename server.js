@@ -1,58 +1,38 @@
 const express = require("express");
-const app = express();
+const cors = require("cors");
 const http = require("http");
-const server = app.listen(3000);
-const { Server } = require("socket.io");
-const { createServer } = require("http");
+const socketIo = require("socket.io");
 
-console.log(`Server is running on port 3000`);
-const socket = require("socket.io");
-
-const path = require("path");
-
-app.use(express.static("public"));
-
-const httpServer = createServer();
-const io = new Server(httpServer, {
+const app = express();
+const server = http.createServer(app); // Use the same server instance
+const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:5500",
-    // or with an array of origins
-    // origin: ["https://my-frontend.com", "https://my-other-frontend.com", "http://localhost:3000"],
-    credentials: true,
+    origin: "*",
+    methods: ["GET", "POST"],
   },
 });
 
-// Set to store the previously generated numbers
-const previouslyGeneratedNumbers = new Set();
+app.use(express.json());
+app.use(cors());
 
-// io.sockets.on("connection", newConnection);
-
-// function newConnection(socket) {
-//   console.log("New connection: " + socket.id);
-// }
-
+// Socket connection
 io.on("connection", (socket) => {
-  console.log("A user connected");
-
+  // Send the current number when a user connects
   socket.on("roll", () => {
-    console.log("Rolling the number");
     const randomNumber = generateRandomNumber();
-    console.log(randomNumber);
-    io.emit("updateDisplay", randomNumber);
+    io.emit("updateNumber", randomNumber);
   });
 
   socket.on("refresh", () => {
     io.emit("resetDisplay", 0);
   });
 
-  socket.on("disconnect", () => {
-    console.log("A user disconnected");
-  });
+  socket.on("disconnect", () => {});
 });
 
+const previouslyGeneratedNumbers = new Set();
 const generateRandomNumber = () => {
   // Array of digits to simulate the rolling effect
-  const digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
   let digit1, digit2, digit3;
   let randomNumber;
@@ -65,11 +45,12 @@ const generateRandomNumber = () => {
   } while (previouslyGeneratedNumbers.has(randomNumber));
 
   previouslyGeneratedNumbers.add(randomNumber);
-
   return { digit1, digit2, digit3 };
 };
 
-// const PORT = process.env.PORT || 3000;
-// server.listen(PORT, () => {
-//   console.log(`Server is running on port ${PORT}`);
-// });
+// Start the server
+const PORT = 5000;
+server.listen(PORT, () => {
+  // Use the 'server' variable here
+  console.log(`Server is running on port ${PORT}`);
+});
